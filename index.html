@@ -1,0 +1,1107 @@
+<!doctype html>
+
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <meta name="theme-color" content="#4F00C9">
+    <meta charset="UTF-8">
+    <title>Odoo Development - Codelab</title>
+    <script src="webcomponents-lite.min.js"></script>
+    <link rel="import" href="codelab.html">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+    <style is="custom-style">
+        body {
+            font-family: "Roboto", sans-serif;
+            background: var(--google-codelab-header-background, --paper-blue-600);
+        }
+    </style>
+
+</head>
+
+<body unresolved class="fullbleed">
+
+    <google-codelab title="Odoo Development - Codelab" environment="web" feedback-link="https://github.com/repodevs/codelab-odoo-development/issues" last-updated="2018-01-01">
+
+        <google-codelab-step label="Overview" duration="3">
+            <p>
+                <img style="max-width: 401.00px" src="img/odoo-logo.png"><span>  </span>
+            </p>
+            <p>Pada Code lab ini kita akan membahas mengenai odoo, dan akan lebih fokus ke dalam development module atau addons odoo</p>
+            <h3>Apa yang akan kita pelajari?</h3>
+            <ul>
+                <li>Apa itu Odoo.</li>
+                <li>Instalasi Odoo.</li>
+                <li>Menggunakan Odoo.</li>
+                <li>Pembuatan Module / Addons.</li>
+                <li>Tips-tips</li>
+            </ul>
+            <h3>Apa saja alat-alat yang diperlukan?</h3>
+            <ul>
+                <li>Operating System yang telah terinstall Python</li>
+                <li>Text Editor (VIM, VSCode, Sublime Text, etc)</li>
+                <li>IDE (PyCharm) (optional)</li>
+            </ul>
+        </google-codelab-step>
+
+
+        <google-codelab-step label="Tentang Odoo" duration="5">
+
+            <h2>Apa Itu Odoo?</h2>
+
+<p>
+Odoo (dulu bernama OpenERP, dan sebelumnya bernama TinyERP) adalah sebuah perangkat lunak Enterprise
+Resource Planning (ERP) atau perangkat lunak perencanaan sumber daya perusahaan yang dilisensikan
+free/open source (LGPLv3). Odoo pertama kali di buat pada tahun 2005 oleh Fabian di Belgium dan dikembangkan dengan bahasa pemrograman Python. Source code dan informasi selengkapnya tentang Odoo bisa didapatkan di website <a href="https://www.odoo.com" target="_blank">https://www.odoo.com</a>
+</p>
+
+<h2>Arsitektur Odoo</h2>
+<p>Selain dibangun menggunakan bahasa python Odoo juga menggunakan technology lainnya, antara lain</p>
+<ul>
+    <li><code>XML</code></li>
+    <li><code>HTML5</code></li>
+    <li><code>Javascript</code></li>
+    <li><code>CSS / LESS</code></li>
+    <li><code>Bootstrap</code></li>
+</ul>
+
+<h2>Modular Technology</h2>
+<p>
+Odoo mengunakan modul sebagai kontainer dari suatu aplikasi atau fitur untuk
+memudahkan maintain code dan pengembangan aplikasi. Di dalam sebuah modul
+diterapkan pola MVC (Model View Controller pattern).
+</p>
+
+        </google-codelab-step>
+
+        <google-codelab-step label="Instalasi Odoo" duration="20">
+
+            <h2>Instalasi Lokal</h2>
+            <p>Untuk melakukan instalasi Odoo di lokal, kita harus install depedencies yang di perlukan Odoo terlebih dahulu</p>
+
+<aside class="warning">
+<i><strong>Note:</strong> Ini Menggunakan Ubuntu 16.04</i>
+</aside>
+<h3>Install Odoo</h3>
+<pre><code>
+sudo apt-get update
+sudo apt-get install build-essential python-imaging python-lxml python-ldap python-dev libldap2-dev libsasl2-dev npm nodejs git python-setuptools libxml2-dev libxslt1-dev libjpeg-dev python-pip gdebi -y
+sudo npm install -g less less-plugin-clean-css -y
+sudo ln -s /usr/bin/nodejs /usr/bin/node
+
+# Install wkhtmltopdf for odoo reporting
+cd /tmp
+wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.2.1/wkhtmltox-0.12.2.1_linux-trusty-amd64.deb
+sudo gdebi -n wkhtmltox-0.12.2.1_linux-trusty-amd64.deb
+rm wkhtmltox-0.12.2.1_linux-trusty-amd64.deb
+sudo ln -s /usr/local/bin/wkhtmltopdf /usr/bin/
+sudo ln -s /usr/local/bin/wkhtmltoimage /usr/bin/
+
+# Install PostgreSQL
+sudo apt-get install postgresql-9.5 postgresql-server-dev-9.5 -y
+# Create Postgres User
+sudo su - postgres -c "createuser -s odoo"
+
+# Buka Folder yang akan digunakan untuk Odoo
+cd ~/odoo-dev/
+
+# Clone Odoo v9
+git clone --depth=1 --branch=9.0 https://github.com/odoo/odoo.git
+
+# Install Odoo Dependencies
+cd odoo
+sudo pip install -r requirements.txt
+
+# Jalankan Odoo
+python odoo.py -r odoo
+</code></pre>
+
+        </google-codelab-step>
+
+
+        <google-codelab-step label="Menggunakan Odoo" duration="20">
+        <p>Pada sesi ini kita akan mengenali bebera dasar Odoo, antara lain</p>
+
+        <ul>
+            <li>Pembuatan database</li>
+            <li>Pengenalan Menu</li>
+            <li>Install Module / Addons</li>
+            <li>Debuging</li>
+        </ul>
+
+        </google-codelab-step>
+
+
+        <google-codelab-step label="Pengenalan addons" duration="20">
+<h2>Struktur addons Odoo</h2>
+<p>Odoo mempunyai standart tersendiri untuk membuat addons, berikut struktur file dan direktori template odoo:</p>
+<pre><code>
+addons/&lt;my_module_name&gt;/                      # Nama folder addons
+|-- __init__.py                                     # Inisialisasi addons folder
+|-- __manifest__.py                                 # File manifest addons 
+|-- controllers/                                    # controllers (HTTP routes).
+|   |-- __init__.py
+|   |-- &lt;inherited_module_name&gt;.py
+|   `-- main.py
+|-- data/                                           # demo dan data xml
+|   |-- &lt;main_model&gt;_data.xml
+|   `-- &lt;inherited_main_model&gt;_demo.xml
+|-- models/                                         # untuk menempatkan object model atau logic dari addons
+|   |-- __init__.py
+|   |-- &lt;main_model&gt;.py
+|   `-- &lt;inherited_main_model&gt;.py
+|-- report/                                         # Untuk reporting
+|   |-- __init__.py
+|   |-- &lt;main_stat_report_model&gt;.py
+|   |-- &lt;main_stat_report_model&gt;_views.xml
+|   |-- &lt;main_print_report&gt;_reports.xml
+|   `-- &lt;main_print_report&gt;_templates.xml
+|-- security/                                       # security groups dan access right (Access Control List)
+|   |-- ir.model.access.csv
+|   `-- &lt;main_model&gt;_security.xml
+|-- static/                                         # static file
+|   |-- img/
+|   |   |-- my_little_kitten.png
+|   |   `-- troll.jpg
+|   |-- lib/
+|   |   `-- external_lib/
+|   `-- src/
+|       |-- js/
+|       |   `-- &lt;my_module_name&gt;.js
+|       |-- css/
+|       |   `-- &lt;my_module_name&gt;.css
+|       |-- less/
+|       |   `-- &lt;my_module_name&gt;.less
+|       `-- xml/
+|           `-- &lt;my_module_name&gt;.xml
+|-- views/                                          # views dan templates
+|   |-- &lt;main_model&gt;_templates.xml
+|   |-- &lt;main_model&gt;_views.xml
+|   |-- &lt;inherited_main_model&gt;_templates.xml
+|   `-- &lt;inherited_main_model&gt;_views.xml
+`-- wizard/
+    |-- &lt;main_transient_A&gt;.py
+    |-- &lt;main_transient_A&gt;_views.xml
+    |-- &lt;main_transient_B&gt;.py
+    `-- &lt;main_transient_B&gt;_views.xml
+</code></pre>
+
+<br><br>
+
+<h3><b>__manifest__.py / __openerp__.py</b></h3>
+<p>file ini merupakan manifest untuk suatu modul, file ini terbuat dari sebuah python dictionary untuk mendefinisikan isi dari suatu modul</p>
+
+<b>__manifest__.py</b>
+<pre><code>
+{
+    'name': 'module name',
+    'version': '1.0',
+    'author': 'author name',
+    'summary': 'summary module',
+    'description': """
+This is describtion
+=========================
+Fitur
+-----
+* fitur 1
+* fitur 2
+* fitur 3
+""",
+    'category': 'category name',
+    'website': 'https://www.example.com',
+    'depends': ['base'],    # list of dependencies addons
+    'data':[
+        'security/groups.xml',          # place groups at the top
+        'security/ir.model.access.csv'  # load access right after groups
+        'views/views.xml',
+        'wizard/wizard.xml',
+        'report/report.xml',
+    ],
+    'demo': ['data/demo.xml'],     # demo data (ex: for unit tests)
+    'installable': True,            # status module `True` `False`
+}
+</code></pre>
+
+        </google-codelab-step>
+
+
+        <google-codelab-step label="Pembuatan addons" duration="20">
+<h2>Pembuatan addons</h2>
+<p>Pada contoh ini kita akan membuat sebuah addons bernama <code>idea</code>. addons ini digunakan untuk menampung setiap ide / Gagasan, dan setiap ide tersebut akan mempunyai nilai voting / pengambilan suara dan setiap pengambilan suara akan di simpan sebagai score dari ide tersebut</p>
+<br>
+
+<h2>Membuat Model</h2>
+<p>Model dibuat sebagai python class yang diturunkan dari class <code>models.Model</code>, didalam class <code>models.Model</code> ini sudah diterapkan konsep ORM yang sangat handal dan memudahkan bagi developer sehingga hampir tidak memerlukan penulisan SQL.</p>
+<br>
+
+<b>models/idea.py</b>
+<pre><code>
+# -*- coding: utf-8 -*-
+from odoo import api, fields, models, _
+
+class idea(models.Model):
+    _name = 'idea.idea'
+
+    name = fields.Char('Title', size=64, required=True, translate=True)
+    owner = fields.Many2one('res.partner', 'Owner', index=True, help='Pemberi Ide')
+    date = fields.Date('Date Release')
+    # Description is read-only when not draft!
+    description = fields.Text('Description')
+    active = fields.Boolean('Active', default=True)
+    # by convention, many2one fields end with '_id'
+    confirm_partner_id = fields.Many2one('res.partner', 'Confirm By')
+    sponsor_ids = fields.Many2many('res.partner', 'idea_sponsor_rel', 'idea_id', 'sponsor_id', 'Sponsors')
+
+    _sql_constraints = [('name_unik', 'unique(name)', _('Ide harus unique!'))]
+</code></pre>
+
+<b>models/__init__.py</b>
+<pre><code>
+# -*- coding: utf-8 -*-
+from . import idea
+</code></pre>
+
+
+<b>views/idea_view.xml</b>
+<pre><code>
+&lt;odoo&gt;
+    &lt;!-- FORM VIEW --&gt;
+    &lt;record id="idea_view_form" model="ir.ui.view"&gt;
+        &lt;field name="name"&gt;idea.view.form&lt;/field&gt;
+        &lt;field name="model"&gt;idea.idea&lt;/field&gt;
+        &lt;field name="arch" type="xml"&gt;
+            &lt;form string="Idea form"&gt;
+                &lt;sheet&gt;
+                    &lt;group&gt;
+                        &lt;group&gt;
+                            &lt;field name="name"/&gt;
+                            &lt;field name="date"/&gt;
+                            &lt;field name="owner"/&gt;
+                            &lt;field name="confirm_partner_id"/&gt;
+                        &lt;/group&gt;
+                        &lt;group&gt;
+                            &lt;field name="active"/&gt;
+                            &lt;field name="sponsor_ids" widget="many2many_tags"/&gt;
+                        &lt;/group&gt;
+                    &lt;/group&gt;
+                    &lt;notebook&gt;
+                        &lt;page string="Description"&gt;
+                            &lt;field name="description" placeholder="Deskripsi tentang ide Anda"/&gt;
+                        &lt;/page&gt;
+                    &lt;/notebook&gt;
+                &lt;/sheet&gt;
+            &lt;/form&gt;
+        &lt;/field&gt;
+    &lt;/record&gt;
+
+    &lt;!-- list / tree view --&gt;
+    &lt;record id="idea_view_list" model="ir.ui.view"&gt;
+        &lt;field name="name"&gt;idea.view.list&lt;/field&gt;
+        &lt;field name="model"&gt;idea.idea&lt;/field&gt;
+        &lt;field name="arch" type="xml"&gt;
+            &lt;tree&gt;
+                &lt;field name="name"/&gt;
+                &lt;field name="owner"/&gt;
+                &lt;field name="date"/&gt;
+            &lt;/tree&gt;
+        &lt;/field&gt;
+    &lt;/record&gt;
+
+    &lt;!-- action view --&gt;
+    &lt;record id="idea_action" model="ir.actions.act_window"&gt;
+        &lt;field name="name"&gt;Idea&lt;/field&gt;
+        &lt;field name="res_model"&gt;idea.idea&lt;/field&gt;
+        &lt;field name="view_id" ref="idea_view_list"/&gt; &lt;!--default view (list view)--&gt;
+        &lt;field name="view_type"&gt;form&lt;/field&gt;
+        &lt;field name="view_mode"&gt;form,tree&lt;/field&gt;
+    &lt;/record&gt;
+
+    &lt;!-- root menu --&gt;
+    &lt;menuitem id="idea_root_menu" name="Idea Management"
+              sequence="10"/&gt;
+
+    &lt;!-- sub menu  --&gt;
+    &lt;menuitem id="idea_mmenu" parent="idea.idea_root_menu" name="Idea"
+              action="idea_action" sequence="10"/&gt;
+
+&lt;/odoo&gt;
+</code></pre>
+
+
+<b>__init__.py</b>
+<pre><code>
+# -*- coding: utf-8 -*-
+import models
+</code></pre>
+
+
+<b>__manifest__.py</b>
+<pre><code>
+{
+    'name': 'Idea',
+    'version': '1.0',
+    'author': 'revstech',
+    'summary': 'Modul tentang ide',
+    'description': """
+Idea - Modul untuk melakukan pencatatan ide
+=========================
+Fitur
+-----
+* Input ide
+* Approve ide
+""",
+    'category': 'Learning',
+    'website': 'https://www.revstech.com',
+    'depends': ['base'],
+    'data':['views/idea_view.xml'],
+    'demo': [],     # demo data (for unit tests)
+    'installable': True,
+    'auto_install': False
+}
+</code></pre>
+
+Setelah semua di buat, lakukan update addons list pada Odoo kemudian install addons tersebut.
+
+        </google-codelab-step>
+
+
+
+        <google-codelab-step label="Idea addons - state" duration="20">
+        <h2>Penambahan state / status addons</h2>
+        <p>Setelah kita membuat dasar dari idea addons, selanjutnya kita akan menambah state / status pada idea tersebut,
+        status disini di antaranya yaitu <code>Draft</code>, <code>Confirmed</code>, <code>Cancel</code></p>
+
+<b>models/idea.py</b>
+<pre><code>
+class idea(models.Model):
+    .....
+    state = fields.Selection([('draft', 'Draft'),
+                              ('confirmed', 'Confirmed'),
+                              ('cancel', 'Cancel')], 'State', required=True, readonly=True,
+                             default='draft')
+    .....
+
+    @api.multi
+    def action_confirm(self):
+        for act in self:
+            act.write({'state': 'confirmed', 'confirm_partner_id': self.env.user.partner_id.id})
+
+    def action_cancel(self):
+        self.state = 'cancel'
+
+    def action_draft(self):
+        self.state = 'draft'
+</code></pre>
+
+<b>views/idea_view.xml</b>
+<pre><code>
+.....
+&lt;form string="Idea form"&gt;
+    &lt;header&gt;
+        &lt;button name="action_confirm" string="Approve" type="object" states="draft"/&gt;
+        &lt;button name="action_cancel" string="Cancel" type="object" states="draft"/&gt;
+        &lt;button name="action_draft" string="Set as Draft" type="object" states="confirmed,cancel"/&gt;
+        &lt;field name="state" widget="statusbar" /&gt;
+    &lt;/header&gt;
+.....
+</code></pre>
+
+Setalah itu lakukan update addons (bisa dengan command)
+<pre>python odoo.py -c odoo.conf -d DATABASE -u idea</pre>
+
+        </google-codelab-step>
+
+
+        <google-codelab-step label="Idea addons - Vote" duration="20">
+        <p>Selanjutnya kita akan menambahkan vote di setiap Idea tersebut</p>
+
+        <h2>Membuat Model</h2>
+
+<b>models/vote.py</b>
+<pre><code>
+# -*- coding: utf-8 -*-
+from odoo import api, fields, models, _
+
+class IdeaVote(models.Model):
+    _name = 'idea.vote'
+
+    idea_id = fields.Many2one('idea.idea', string='Idea', required=True)
+    voter_id = fields.Many2one('res.partner', string='Voter',
+                               help='orang yang memberikan vote terhadap Ide')
+    voter_name = fields.Char(related='voter_id.name')
+    voter_street = fields.Char(related='voter_id.street')
+    date = fields.Date('Tanggal', default=fields.Date.context_today)
+    score = fields.Float('Score')
+    description = fields.Text('Description')
+</code></pre>
+
+
+<b>models/__init__.py</b>
+<pre><code>
+.....
+from . import vote
+</code></pre>
+
+<b>views/idea_vote_view.xml</b>
+<pre><code>
+&lt;odoo&gt;
+    &lt;record id="idea_vote_view_form" model="ir.ui.view"&gt;
+        &lt;field name="name"&gt;idea.view.form&lt;/field&gt;
+        &lt;field name="model"&gt;idea.vote&lt;/field&gt;
+        &lt;field name="arch" type="xml"&gt;
+            &lt;form&gt;
+                &lt;sheet&gt;
+                    &lt;group&gt;
+                        &lt;group&gt;
+                            &lt;field name="voter_id" context="{'show_address': 1}" /&gt;
+                            &lt;field name="idea_id"/&gt;
+                            &lt;field name="date"/&gt;
+                            &lt;field name="score"/&gt;
+                        &lt;/group&gt;
+                        &lt;group&gt;
+                            &lt;field name="description"/&gt;
+                            &lt;field name="voter_name"/&gt;
+                            &lt;field name="voter_street"/&gt;
+                        &lt;/group&gt;
+                    &lt;/group&gt;
+                &lt;/sheet&gt;
+            &lt;/form&gt;
+        &lt;/field&gt;
+    &lt;/record&gt;
+
+    &lt;record id="idea_vote_view_list" model="ir.ui.view"&gt;
+        &lt;field name="name"&gt;idea.vote.view.list&lt;/field&gt;
+        &lt;field name="model"&gt;idea.vote&lt;/field&gt;
+        &lt;field name="arch" type="xml"&gt;
+            &lt;tree&gt;
+                &lt;field name="voter_id"/&gt;
+                &lt;field name="date"/&gt;
+                &lt;field name="score"/&gt;
+            &lt;/tree&gt;
+        &lt;/field&gt;
+    &lt;/record&gt;
+
+    &lt;record id="idea_vote_action" model="ir.actions.act_window"&gt;
+        &lt;field name="name"&gt;Vote&lt;/field&gt;
+        &lt;field name="res_model"&gt;idea.vote&lt;/field&gt;
+        &lt;field name="view_id" ref="idea_vote_view_list"/&gt;
+        &lt;field name="view_type"&gt;form&lt;/field&gt;
+        &lt;field name="view_mode"&gt;form,tree&lt;/field&gt;
+    &lt;/record&gt;
+
+
+    &lt;menuitem id="idea_vote_menu" parent="idea.idea_root_menu" name="Vote"
+              action="idea_vote_action" sequence="15"/&gt;
+
+&lt;/odoo&gt;
+</code></pre>
+
+<b>__manifest__.py</b>
+<pre><code>
+.....
+'data':[
+    'views/idea_view.xml',
+    'views/idea_vote_view.xml',
+],
+.....
+</code></pre>
+
+Lakukan update module, dan akan ada menu <code>Vote</code> di bawah <code>Idea</code>
+
+
+<h2>Menambahkan Search</h2>
+Kita akan menambahkan fitur <code>search</code> pada vote
+
+
+<b>views/idea_vote_view.xml</b>
+<pre><code>
+.....
+&lt;record id="idea_vote_view_form" model="ir.ui.view"&gt;
+......
+&lt;record id="idea_vote_view_search" model="ir.ui.view"&gt;
+    &lt;field name="name"&gt;idea.vote.view.seacrh&lt;/field&gt;
+    &lt;field name="model"&gt;idea.vote&lt;/field&gt;
+    &lt;field name="arch" type="xml"&gt;
+        &lt;search&gt;
+            &lt;field name="voter_id"/&gt;
+            &lt;field name="score"/&gt;
+            &lt;group expand="0" string="Group By"&gt;
+                &lt;filter string="Voter"  context="{'group_by': 'voter_id'}"/&gt;
+                &lt;filter string="Date"  context="{'group_by': 'date:day'}"/&gt;
+            &lt;/group&gt;
+        &lt;/search&gt;
+    &lt;/field&gt;
+&lt;/record&gt;
+......
+&lt;record id="idea_vote_view_list" model="ir.ui.view"&gt;
+......
+</code></pre>
+
+
+        </google-codelab-step>
+
+        <google-codelab-step label="Idea addons - show voter" duration="20">
+        <p>Selanjutnya kita akan menampilkan jumlah score pada idea, dan menampilkan list voter</p>
+
+<b>model/idea.py</b>
+<pre><code>
+class idea(models.Model):
+.....
+score = fields.Integer('Score', compute='_compute_score', default=0, readonly=True)
+vote_ids = fields.One2many('idea.vote', 'idea_id', string='Votes')
+.....
+.....
+# hitung score berdasarkan voter
+@api.multi
+@api.depends('vote_ids')
+def _compute_score(self):
+    for rec in self:
+        tot_score = 0
+        for vote in rec.vote_ids:
+            tot_score += vote.score
+        rec.score = tot_score
+.....
+</code></pre>
+
+
+<b>views/idea_view.xml</b>
+<pre><code>
+&lt;form string="Idea form"&gt;
+.....
+&lt;group&gt;
+    &lt;field name="score"/&gt;
+    &lt;field name="active"/&gt;
+    &lt;field name="sponsor_ids" widget="many2many_tags"/&gt;
+&lt;/group&gt;
+....
+&lt;notebook&gt;
+....
+    &lt;page string="Voter"&gt;
+        &lt;field name="vote_ids"/&gt;
+    &lt;/page&gt;
+&lt;/notebook&gt;
+......
+
+
+......
+&lt;tree&gt;
+    &lt;field name="name"/&gt;
+    &lt;field name="owner"/&gt;
+    &lt;field name="date"/&gt;
+    &lt;field name="score"/&gt;                
+&lt;/tree&gt;
+......
+</code></pre>
+        </google-codelab-step>
+
+        <google-codelab-step label="Menambahkan Messaging" duration="20">
+
+<b>models/vote.py</b>
+<pre><code>
+class idea(models.Model):
+    _name = 'idea.idea'
+    _inherit = ['mail.thread']
+.....
+</code></pre>
+
+<b>views/idea_view.xml</b>
+<pre><code>
+&lt;record id="idea_view_form" model="ir.ui.view"&gt;
+.....
+&lt;/sheet&gt;
+&lt;div class="oe_chatter"&gt;
+    &lt;field name="message_follower_ids" widget="mail_followers"/&gt;
+    &lt;field name="message_ids" widget="mail_thread"/&gt;
+&lt;/div&gt;
+.....
+</code></pre>
+
+<b>__manifest__.py</b>
+<pre><code>
+.....
+'depends': ['base', 'mail'],
+.....
+</code></pre>
+
+<aside class="warning">
+<strong>Note</strong>: Pastikan addons <code>mail</code> terinstall
+</aside>
+
+        </google-codelab-step>
+
+        <google-codelab-step label="Security addons" duration="20">
+<p>Menambahkan security atau access rules</p>
+
+<b>security/ir.model.access.csv</b>
+<pre><code>
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+idea_idea_access_public,idea.idea.access.public,model_idea_idea,,1,0,0,0
+idea_vote_access_public,idea.idea.access.public,model_idea_vote,,1,1,1,0
+</code></pre>
+
+<b>__manifest__.py</b>
+<pre><code>
+....
+'data':[
+    ...
+    'security/ir.model.access.csv',
+],
+....
+</code></pre>
+        </google-codelab-step>
+
+
+        <google-codelab-step label="website frontend" duration="20">
+<p>Setelah kita membuat addons untuk backend Odoo, sekarang kita akan membuat addons untuk website frontend</p>
+
+<p>pada contoh kali ini website frontend akan menampilkan list idea dan user bisa melakukan voting terhadap idea tersebut pada halaman website</p>
+
+<h3>Buat sebuah module / addons baru bernama <colgroup>website_idea</colgroup></h3>
+
+<b>controllers/main.py</b>
+<pre><code>
+# -*- coding: utf-8 -*-
+from odoo import http           # HTTP Layer odoo
+from odoo.http import request   #request object untuk Handle Request didalam odoo
+
+
+class WebsiteIdea(http.Controller):
+
+    @http.route(["/idea"], type="http", auth="public", website=True)
+    def vote(self):
+        return request.render('website_idea.index')
+</code></pre>
+
+
+<b>controllers/__init__.py</b>
+<pre><code>
+# -*- coding: utf-8 -*-
+from . import main
+</code></pre>
+
+
+<b>views/website_idea_template.xml</b>
+<pre><code>
+&lt;odoo&gt;
+
+    &lt;template id="index" name="Idea Template Index"&gt;
+        &lt;t t-call="website.layout"&gt;
+            &lt;div id="wrap"&gt;
+                &lt;div class="oe_structure"/&gt;
+                &lt;div id="idea-header" class="oe_structure"&gt;
+
+                    &lt;h1 class="text-center"&gt;Hello World!&lt;/h1&gt;
+
+                &lt;/div&gt;
+                &lt;div class="oe_structure"/&gt;
+
+            &lt;/div&gt;
+        &lt;/t&gt;
+    &lt;/template&gt;
+
+&lt;/odoo&gt;
+</code></pre>
+
+
+<b>__init__.py</b>
+<pre><code>
+# -*- coding: utf-8 -*-
+import controllers
+</code></pre>
+
+
+<b>__manifest__.py</b>
+<pre><code>
+{
+    'name': 'Idea Website',
+    'author': 'revstech',    
+    'category': 'Website',
+    'website': 'https://www.revstech.com/idea',
+    'summary': 'Publish Your Idea',
+    'version': '1.0',
+    'description': """
+Voter - Idea Website
+======================
+""",
+    'depends': [
+        'website',
+        'idea',
+    ],
+    'demo': [],
+    'data': [
+        'views/website_idea_template.xml',
+    ],
+    'installable': True,
+}
+</code></pre>
+
+
+<p>Lakukan install addons dan kemudian buka <a href="http://0.0.0.0:8069/idea" target="_blank">http://0.0.0.0:8069/idea</a> untuk melihat hasilnya</p>
+
+
+<br> <br>
+        </google-codelab-step>
+
+
+        <google-codelab-step label="Website - Show Idea" duration="20">
+<p>Kita akan menampilkan semua idea yang tersedida ke halaman website</p>
+<p>lakukan perubahan code yang telah kita buat sebelumnya</p>
+
+
+<b>controllers/main.py</b>
+<pre><code>
+# -*- coding: utf-8 -*-
+from odoo import http           # HTTP Layer odoo
+from odoo.http import request   #request object untuk Handle Request didalam odoo
+
+
+class WebsiteIdea(http.Controller):
+
+    @http.route(["/idea"], type="http", auth="public", website=True)
+    def idea(self):
+        domain = []
+        # get all idea
+        idea_obj = request.env['idea.idea'].search(domain)
+        values = {
+            'idea_datas': idea_obj,
+            'title': 'Idea : My Website',
+        }
+        return request.render('website_idea.index', values)
+</code></pre>
+
+
+<b>views/website_idea_template.xml</b>
+<pre><code>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;odoo&gt;
+    &lt;!-- index template --&gt;
+    &lt;template id="index" name="Idea Template Index"&gt;
+        &lt;t t-call="website.layout"&gt;
+            &lt;div id="wrap"&gt;
+                &lt;div class="oe_structure"/&gt;
+                &lt;div id="idea-header" class="oe_structure"&gt;
+                    &lt;section&gt;
+                        &lt;h1 class="text-center"&gt;
+                            &lt;t t-esc="title"/&gt;
+                        &lt;/h1&gt;
+                        &lt;h2 class="text-center text-muted"&gt;
+                            List Idea
+                        &lt;/h2&gt;
+                    &lt;/section&gt;
+                &lt;/div&gt;
+                &lt;div class="oe_structure"/&gt;
+
+            &lt;/div&gt;
+        &lt;/t&gt;
+    &lt;/template&gt;
+
+
+    &lt;!-- inherit index template --&gt;
+    &lt;template id="index-inherit" name="Idea Template Index Inherit" inherit_id="website_idea.index"&gt;
+        &lt;xpath expr="//div[@id='idea-header']" position="after"&gt;
+            &lt;div class="container"&gt;
+                &lt;table class="table table-bordered table-striped"&gt;
+                    &lt;tr style="background: #dae8f5;"&gt;
+                        &lt;th style="width: 20%;"&gt;
+                            &lt;span&gt;Judul&lt;/span&gt;
+                        &lt;/th&gt;
+                        &lt;th style="width: 15%;"&gt;
+                            &lt;span&gt;Tanggal&lt;/span&gt;
+                        &lt;/th&gt;
+                        &lt;th style="width: 20%;"&gt;
+                            &lt;span&gt;Pemilik Ide&lt;/span&gt;
+                        &lt;/th&gt;
+                        &lt;th style="width: 35%;"&gt;
+                            &lt;span&gt;Keterangan&lt;/span&gt;
+                        &lt;/th&gt;
+                        &lt;th style="width: 10%;"&gt;
+                            &lt;span&gt;Score&lt;/span&gt;
+                        &lt;/th&gt;
+                    &lt;/tr&gt;
+                    &lt;t t-foreach="idea_datas" t-as="rec"&gt;
+                        &lt;tr&gt;
+                            &lt;td&gt;
+                                &lt;span t-field="rec.name"/&gt;
+                            &lt;/td&gt;
+                            &lt;td&gt;
+                                &lt;span t-field="rec.date"/&gt;
+                            &lt;/td&gt;
+                            &lt;td&gt;
+                                &lt;span t-field="rec.owner"/&gt;
+                            &lt;/td&gt;
+                            &lt;td&gt;
+                                &lt;span t-field="rec.description"/&gt;
+                            &lt;/td&gt;
+                            &lt;td&gt;
+                                &lt;span t-field="rec.score"/&gt;
+                            &lt;/td&gt;
+                        &lt;/tr&gt;
+                    &lt;/t&gt;
+                &lt;/table&gt;
+            &lt;/div&gt;
+        &lt;/xpath&gt;
+    &lt;/template&gt;
+
+
+    &lt;!--inherit footer, untuk menambahkan link ke page idea --&gt;
+    &lt;template id="idea_link_menu" inherit_id="website.footer_default" name="Footer Customer Idea Link"&gt;
+        &lt;xpath expr="//div[@id='info']/ul" position="inside"&gt;
+            &lt;li&gt;&lt;a href="/idea"&gt;IDEA&lt;/a&gt;&lt;/li&gt;
+        &lt;/xpath&gt;
+    &lt;/template&gt;
+
+&lt;/odoo&gt;
+</code></pre>
+
+        </google-codelab-step>
+
+
+        <google-codelab-step label="Website - Idea Detail" duration="20">
+<p>Kita akan menampilkan detail dari idea setiap ide</p>
+
+
+<b>controllers/main.py</b>
+<pre><code>
+....
+from odoo.addons.website.models.website import unslug
+
+
+class WebsiteIdea(http.Controller):
+....
+    @http.route(['/idea/<idea_id>'], type='http', auth='public', website=True)
+    def idea_detail(self, idea_id):
+        # unslug url saat ini
+        # return dari unslug ini adalah `title`, `id`
+        _title, _id = unslug(idea_id)
+        # sudo() digunakan untuk browse data sebagai `root`
+        idea_obj = request.env['idea.idea'].sudo().browse(_id)
+        values = {
+            'idea_data': idea_obj,
+        }
+        return request.render('website_idea.idea_detail', values)
+</code></pre>
+
+
+<b>views/website_idea_template.xml</b>
+<pre><code>
+&lt;t t-foreach="idea_datas" t-as="rec"&gt;
+.....
+        &lt;td&gt;
+            &lt;a t-attf-href="/idea/#{slug(rec)}"&gt;
+                &lt;span t-field="rec.name"/&gt;
+             &lt;/a&gt;
+        &lt;/td&gt;
+</code></pre>
+
+<aside class="special">
+<strong>Note:</strong> <code>slug()</code> adalah function bawaan qweb odoo
+</aside>
+
+
+<b>views/website_idea_detail_template.xml</b>
+<pre><code>
+&lt;odoo&gt;
+
+    &lt;template id="idea_detail" name="idea detail"&gt;
+        &lt;t t-call="website.layout"&gt;
+            &lt;div class="container"&gt;
+                &lt;div class="oe_structure"/&gt;
+
+                &lt;h1&gt;Idea detail&lt;/h1&gt;
+                &lt;div class="oe_structure col-md-8"&gt;
+
+                    &lt;h1&gt;
+                        &lt;span t-field="idea_data.name"/&gt;
+                    &lt;/h1&gt;
+                    &lt;p&gt;
+                        &lt;span t-field="idea_data.description"/&gt;
+                    &lt;/p&gt;
+
+                &lt;/div&gt;
+
+                &lt;div class="oe_structure col-md-4"/&gt;
+
+                &lt;div class="oe_structure"/&gt;
+            &lt;/div&gt;
+        &lt;/t&gt;
+    &lt;/template&gt;
+
+&lt;/odoo&gt;
+</code></pre>
+
+<b>__manifest__.py</b>
+<pre><code>
+....
+'data': [
+...
+    'views/website_idea_detail_template.xml',
+],
+....
+</code></pre>
+
+
+        </google-codelab-step>
+
+
+        <google-codelab-step label="Website - Idea Vote" duration="20">
+<p>Sekarang kita akan menambahkan fungsi untuk voting pada halaman website</p>
+
+
+<b>controllers/main.py</b>
+<pre><code>
+import datetime
+
+
+class WebsiteIdea(http.Controller):
+....
+    @http.route(['/idea/vote'], type='http', auth='public', website=True, methods=['POST'], csrf=False)
+    def vote_add(self, **data):
+        value = {
+            'idea_id': data['id'],
+            'date': datetime.datetime.today(),
+            'score': data['score'],
+        }
+        vote = request.env['idea.vote'].sudo().create(value)
+        return request.redirect("/idea/vote/success")
+
+
+    @http.route(["/idea/vote/success"], type="http", auth="public", website=True)
+    def vote_success(self):
+        return request.render('website_idea.vote_success')
+
+</code></pre>
+
+
+<b>views/website_idea_detail_template.xml</b>
+<pre><code>
+&lt;odoo&gt;
+
+    &lt;template id="idea_detail" name="idea detail"&gt;
+        &lt;t t-call="website.layout"&gt;
+            &lt;div class="container"&gt;
+                &lt;div class="oe_structure"/&gt;
+
+                &lt;h1&gt;Vote Idea&lt;/h1&gt;
+                &lt;div class="oe_structure col-md-8"&gt;
+
+                    &lt;form action="/idea/vote" method="POST"&gt;
+                        &lt;t&gt;
+                            &lt;h2&gt;
+                                &lt;span t-field="idea_data.name"/&gt;
+                            &lt;/h2&gt;
+                            &lt;p&gt;
+                                &lt;span t-field="idea_data.description"/&gt;
+                            &lt;/p&gt;
+                        &lt;/t&gt;
+                        &lt;label class="control-label label-optional" for="score"&gt;Score&lt;/label&gt;
+                        &lt;input type="text" name="score" required="required" class="form-control" /&gt;
+                        &lt;input type="hidden" name="id"  t-att-value="idea_data.id"/&gt;
+                        &lt;p&gt;&lt;/p&gt;
+                        &lt;div class="clearfix"&gt;
+                            &lt;button type="submit" class="btn btn-default btn-primary pull-right mb32 "&gt;
+                                Confirm&lt;t&gt;&lt;/t&gt;
+                                &lt;span class="fa fa-long-arrow-right" /&gt;
+                            &lt;/button&gt;
+                        &lt;/div&gt;
+                    &lt;/form&gt;
+                &lt;/div&gt;
+
+                &lt;div class="oe_structure"/&gt;
+            &lt;/div&gt;
+        &lt;/t&gt;
+    &lt;/template&gt;
+
+
+    &lt;template id="vote_success" name="Vote Success"&gt;
+        &lt;t t-call="website.layout"&gt;
+            &lt;div class="container"&gt;
+                &lt;div class="oe_structure"/&gt;
+
+                &lt;h1 class="text-center btn-primary"&gt;Vote anda Berhasil&lt;/h1&gt;
+                &lt;p&gt; &lt;a href="/idea"&gt;Lihat list idea&lt;/a&gt;&lt;/p&gt;
+                &lt;div class="oe_structure"/&gt;
+            &lt;/div&gt;
+        &lt;/t&gt;
+    &lt;/template&gt;
+
+&lt;/odoo&gt;
+</code></pre>
+
+<p>Lakukan update module dan lihat hasilnya</p>
+        </google-codelab-step>
+
+
+        <google-codelab-step label="Tips-tips" duration="0">
+<p>Tips tips dalam development Odoo</p>
+
+<aside class="special">
+    <ul class="checklist">
+        <li><code>odoorpc</code></li>
+        <li>search addons in github</li>
+        <li>odoo docs</li>
+        <li>odoo-development.readthedocs.org</li>
+    </ul>
+</aside>
+        </google-codelab-step>
+
+        <google-codelab-step label="Codelab Selesai!" duration="0">
+            <p>Selamat anda telah selesai mengikuti codelab Odoo Development ini.</p>
+            <h3 class="checklist">Ringkasan</h3>
+            <ul class="checklist">
+                <li>Tentang Odoo</li>
+                <li>Instalasi Odoo</li>
+                <li>Menggunakan Odoo</li>
+                <li>Membuat module / addons</li>
+            </ul>
+            <h3>Referensi</h3>
+            <ul>
+                <li><a href="https://www.odoo.com" target="_blank">https://www.odoo.com</a></li>
+                <li>Komunitas Odoo Indonesia - Surabaya</li>
+            </ul>
+
+        </google-codelab-step>
+
+    </google-codelab>
+
+    <script>
+        (function(i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function() {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-69004355-4', 'auto');
+
+        (function() {
+            var gaCodelab = '';
+            if (gaCodelab) {
+                ga('create', gaCodelab, 'auto', {
+                    name: 'codelab'
+                });
+            }
+
+            var gaView;
+            var parts = location.search.substring(1).split('&');
+            for (var i = 0; i < parts.length; i++) {
+                var param = parts[i].split('=');
+                if (param[0] === 'viewga') {
+                    gaView = param[1];
+                    break;
+                }
+            }
+            if (gaView && gaView !== gaCodelab) {
+                ga('create', gaView, 'auto', {
+                    name: 'view'
+                });
+            }
+        })();
+    </script>
+
+</body>
+
+</html>
